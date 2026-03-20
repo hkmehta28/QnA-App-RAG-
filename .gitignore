@@ -1,0 +1,23 @@
+# Virtual environment (your venv folder)
+venv/
+
+# Environment variables (VERY IMPORTANT - contains API key)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code settings (optional)
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Chroma vector DB (will be created later)
+chroma/
+*.sqlite3
+
+# Temporary / logs
+*.log
