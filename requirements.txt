@@ -6,3 +6,6 @@ docx2txt
 pypdf
 streamlit
 tiktoken
+langchain-community
+langchain-openai
+chromadb
