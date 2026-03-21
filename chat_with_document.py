@@ -82,17 +82,16 @@ def clear_history():
 
 if __name__ == "__main__":
     import os
-    from dotenv import load_dotenv, find_dotenv
-
-    load_dotenv(find_dotenv(), override=True)
 
     st.image('img.webp', width=400)
     st.subheader('LLM Question-Answering Application 🤖')
 
     with st.sidebar:
         api_key = st.text_input('OpenAI API Key:', type='password')
-        if api_key:
-            os.environ['OPENAI_API_KEY'] = api_key
+        if not api_key:
+            st.warning("Please enter your OpenAI API Key to continue")
+            st.stop()
+        os.environ['OPENAI_API_KEY'] = api_key
 
         uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
         chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
