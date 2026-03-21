@@ -136,7 +136,7 @@ if __name__ == "__main__":
             if 'history' not in st.session_state:
                 st.session_state.history = ''
 
-            value = f'Q: {q} \nA: {answer}'
+            value = f'Q: {query} \nA: {answer}'
 
             st.session_state.history = (
                 f'{value} \n {"-" * 100} \n {st.session_state.history}'
