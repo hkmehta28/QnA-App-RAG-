@@ -4,8 +4,11 @@ langchain_openai
 chromadb
 docx2txt
 pypdf
+pymupdf
 streamlit
 tiktoken
 langchain-community
 langchain-openai
 chromadb
+langchain-ollama
+streamlit-chat
