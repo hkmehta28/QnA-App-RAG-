@@ -1,7 +1,10 @@
 import streamlit as st
-from langchain_ollama import OllamaEmbeddings          # ← CHANGED (was OpenAIEmbeddings)
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 import os
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv(), override=True)
 
 
 def load_document(file):
@@ -34,7 +37,7 @@ def chunk_data(data, chunk_size=256, chunk_overlap=100):
 
 def create_embeddings(chunks):
     import uuid
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")   # ← CHANGED
+    embeddings = OpenAIEmbeddings()
     vector_store = Chroma.from_documents(
         chunks, 
         embeddings,
@@ -44,10 +47,10 @@ def create_embeddings(chunks):
 
 
 def ask_and_get_answer(vector_store, query, k=3):
-    from langchain_ollama import ChatOllama                    # ← CHANGED (was ChatOpenAI)
+    from langchain_openai import ChatOpenAI
     from langchain_core.prompts import ChatPromptTemplate
 
-    llm = ChatOllama(model="llama3.2", temperature=0)         # ← CHANGED
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
     retriever = vector_store.as_retriever(search_kwargs={"k": k})
 
@@ -67,19 +70,27 @@ def ask_and_get_answer(vector_store, query, k=3):
         yield chunk.content
 
 
+def calculate_embedding_cost(texts):
+    import tiktoken
+    enc = tiktoken.encoding_for_model('text-embedding-3-small')
+    total_tokens = sum([len(enc.encode(page.page_content)) for page in texts])
+    return total_tokens, total_tokens / 1000 * 0.0004
+
+
 def clear_history():
     if 'messages' in st.session_state:
         del st.session_state['messages']
 
 
 if __name__ == "__main__":
+    if not os.environ.get("OPENAI_API_KEY"):
+        st.error("OPENAI_API_KEY not found in environment or .env file. Please add it to your .env file.")
+        st.stop()
 
     st.image('img.webp', width=400)
     st.subheader('LLM Question-Answering Application 🤖')
 
     with st.sidebar:
-        # ← REMOVED: entire api_key block and os.environ line
-
         uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
         chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=1024, on_change=clear_history)
         k = st.number_input('k(number of chunks)', min_value=1, max_value=20, value=3, on_change=clear_history)
@@ -98,7 +109,8 @@ if __name__ == "__main__":
                 chunks = chunk_data(data, chunk_size=chunk_size)
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
-                # ← REMOVED: calculate_embedding_cost (tiktoken / OpenAI-specific)
+                tokens, embedding_cost = calculate_embedding_cost(chunks)
+                st.write(f'Embedding cost: ${embedding_cost:.4f}')
 
                 vector_store = create_embeddings(chunks)
                 st.session_state.vs = vector_store
