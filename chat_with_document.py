@@ -1,11 +1,15 @@
-import streamlit as st
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
+
+import streamlit as st
 import os
-from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv(), override=True)
-
+# Load from .env locally, Streamlit secrets in production
+if "OPENAI_API_KEY" in st.secrets:
+    os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+else:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv(), override=True)
 
 def load_document(file):
     name, extension = os.path.splitext(file)
